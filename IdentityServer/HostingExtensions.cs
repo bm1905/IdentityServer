@@ -1,9 +1,12 @@
 using Emailer.Config;
 using Emailer.Services;
+using HealthChecks.UI.Client;
 using IdentityServer.Data;
 using IdentityServer.Models;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 
 namespace IdentityServer;
@@ -20,6 +23,8 @@ internal static class HostingExtensions
         builder.Services.AddScoped<IEmailService, EmailService>();
 
         builder.Services.AddRazorPages();
+
+        builder.Services.AddHealthChecks();
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
@@ -66,6 +71,11 @@ internal static class HostingExtensions
         //        options.ClientSecret = "copy client secret from Google here";
         //    });
 
+        builder.Services.AddHealthChecks()
+            .AddSqlServer(configuration.GetSection("ConnectionStrings:DatabaseConnection").Value ?? string.Empty,
+                name: "Identity Server Database Health",
+                failureStatus: HealthStatus.Degraded);
+
         return builder.Build();
     }
     
@@ -82,7 +92,15 @@ internal static class HostingExtensions
         app.UseRouting();
         app.UseIdentityServer();
         app.UseAuthorization();
-        
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+            endpoints.MapHealthChecks("/healthcheck", new HealthCheckOptions()
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+        });
         app.MapRazorPages();
 
         return app;
