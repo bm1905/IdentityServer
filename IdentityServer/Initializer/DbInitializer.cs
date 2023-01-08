@@ -1,82 +1,92 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using IdentityModel;
-using IdentityServer.DbContext;
+using IdentityServer.Data;
 using IdentityServer.Models;
 using Microsoft.AspNetCore.Identity;
+using Serilog;
 
-namespace IdentityServer.Initializer
+namespace IdentityServer.Initializer;
+
+public class DbInitializer
 {
-    public class DbInitializer : IDbInitializer
+    public const string Admin = "admin";
+    public const string Regular = "regular";
+
+    public static async Task<bool> EnsureSeedData(WebApplication app)
     {
-        private readonly ApplicationDbContext _db;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        using IServiceScope scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        ApplicationDbContext context = scope.ServiceProvider.GetService<ApplicationDbContext>();
 
-        public DbInitializer(ApplicationDbContext db, UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+        if (context == null) throw new Exception("Null ApplicationDbContext");
+
+        // Creates database and runs migration if database does not exist.
+        await context.Database.EnsureCreatedAsync();
+
+        RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        UserManager<ApplicationUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        if (await roleManager.FindByNameAsync(Admin) == null)
         {
-            _db = db;
-            _userManager = userManager;
-            _roleManager = roleManager;
-        }
-
-        public void Initialize()
-        {
-            bool dbCreated = _db.Database.EnsureCreated();
-            if (dbCreated)
+            await roleManager.CreateAsync(new IdentityRole(Admin));
+            ApplicationUser adminUser = new ApplicationUser
             {
-                // _db.Database.Migrate();
-            }
-
-            if (_roleManager.FindByNameAsync(Config.Admin).Result == null)
-            {
-                _roleManager.CreateAsync(new IdentityRole(Config.Admin)).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole(Config.Customer)).GetAwaiter().GetResult();
-            }
-            else
-            {
-                return;
-            }
-
-            // Test admin user
-            ApplicationUser adminUser = new ApplicationUser()
-            {
-                UserName = "admin_bijay",
+                UserName = "admin_user",
                 Email = "bijay@admin.com",
                 EmailConfirmed = true,
                 PhoneNumber = "1234567890",
                 FirstName = "Bijay",
                 LastName = "Maharjan"
             };
-            _userManager.CreateAsync(adminUser, "Test123*").GetAwaiter().GetResult();
-            _userManager.AddToRoleAsync(adminUser, Config.Admin).GetAwaiter().GetResult();
-            IdentityResult tempAdmin = _userManager.AddClaimsAsync(adminUser, new Claim[]
-            {
-                new(JwtClaimTypes.Name, adminUser.FirstName + " " + adminUser.LastName),
-                new(JwtClaimTypes.GivenName, adminUser.FirstName),
-                new(JwtClaimTypes.FamilyName, adminUser.LastName),
-                new(JwtClaimTypes.Role, Config.Admin)
-            }).Result;
+            await CreateUser(userManager, adminUser, "Test123*", Admin);
 
-            // Test normal user
-            ApplicationUser regularUser = new ApplicationUser()
+            if (await roleManager.FindByNameAsync(Regular) != null) return true;
+
+            await roleManager.CreateAsync(new IdentityRole(Regular));
+            ApplicationUser regularUser = new ApplicationUser
             {
-                UserName = "regular_bijay",
+                UserName = "regular_user",
                 Email = "bijay@regular.com",
                 EmailConfirmed = true,
                 PhoneNumber = "1234567890",
                 FirstName = "Bijay",
                 LastName = "Maharjan"
             };
-            _userManager.CreateAsync(regularUser, "Test123*").GetAwaiter().GetResult();
-            _userManager.AddToRoleAsync(regularUser, Config.Customer).GetAwaiter().GetResult();
-            IdentityResult tempRegular = _userManager.AddClaimsAsync(regularUser, new Claim[]
-            {
-                new(JwtClaimTypes.Name, regularUser.FirstName + " " + regularUser.LastName),
-                new(JwtClaimTypes.GivenName, regularUser.FirstName),
-                new(JwtClaimTypes.FamilyName, regularUser.LastName),
-                new(JwtClaimTypes.Role, Config.Customer)
-            }).Result;
+            await CreateUser(userManager, regularUser, "Test123*", Regular);
         }
+        else
+        {
+            Log.Debug($"{Admin} and {Regular} roles already exist");
+            return true;
+        }
+
+        return true;
+    }
+
+    private static async Task CreateUser(UserManager<ApplicationUser> userManager, ApplicationUser user, string password, string roleName)
+    {
+        IdentityResult createUserResult = await userManager.CreateAsync(user, password);
+        if (!createUserResult.Succeeded)
+        {
+            throw new Exception(createUserResult.Errors.First().Description);
+        }
+
+        IdentityResult addToRoleResult = await userManager.AddToRoleAsync(user, roleName);
+        if (!addToRoleResult.Succeeded)
+        {
+            throw new Exception(addToRoleResult.Errors.First().Description);
+        }
+
+        IdentityResult addClaimsResult = await userManager.AddClaimsAsync(user, new Claim[]{
+            new(JwtClaimTypes.Name, user.FirstName + " " + user.LastName),
+            new(JwtClaimTypes.GivenName, user.FirstName),
+            new(JwtClaimTypes.FamilyName, user.LastName),
+            new(JwtClaimTypes.Role, roleName)
+        });
+
+        if (!addClaimsResult.Succeeded)
+        {
+            throw new Exception(addClaimsResult.Errors.First().Description);
+        }
+        Log.Debug($"User with {roleName} role created");
     }
 }
