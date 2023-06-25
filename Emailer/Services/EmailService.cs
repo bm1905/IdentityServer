@@ -1,8 +1,9 @@
 ﻿using Emailer.Config;
 using Emailer.Model;
-using FinancePlanner.Shared.Models.Exceptions;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Http;
 using MimeKit;
+using Shared.Models.Exceptions;
 
 namespace Emailer.Services;
 
@@ -15,28 +16,28 @@ public class EmailService : IEmailService
         _emailConfig = emailConfig;
     }
 
-    public async Task<bool> SendEmailAsync(Email emailRequest)
+    public async Task<bool> SendEmailAsync(Email email)
     {
-        MimeMessage mailMessage = CreateEmailMessage(emailRequest);
+        MimeMessage mailMessage = CreateEmailMessage(email);
         await SendAsync(mailMessage);
         return true;
     }
 
     private MimeMessage CreateEmailMessage(Email email)
     {
-        MimeMessage emailMessage = new MimeMessage();
+        MimeMessage emailMessage = new();
         emailMessage.From.Add(new MailboxAddress(_emailConfig.MailBoxName, _emailConfig.From));
         emailMessage.To.AddRange(email.To);
         emailMessage.Subject = email.Subject;
 
-        BodyBuilder bodyBuilder = new BodyBuilder { HtmlBody = $"<h2 style='color:red;'>{email.Content}</h2>" };
+        BodyBuilder bodyBuilder = new() { HtmlBody = $"<p style='color:red;'>{email.Content}</p>" };
 
         if (email.Attachments != null && email.Attachments.Any())
         {
-            foreach (var attachment in email.Attachments)
+            foreach (IFormFile attachment in email.Attachments)
             {
                 byte[] fileBytes;
-                using (var ms = new MemoryStream())
+                using (MemoryStream ms = new())
                 {
                     attachment.CopyTo(ms);
                     fileBytes = ms.ToArray();
@@ -52,7 +53,7 @@ public class EmailService : IEmailService
 
     private async Task SendAsync(MimeMessage mailMessage)
     {
-        using SmtpClient client = new SmtpClient();
+        using SmtpClient client = new();
         try
         {
             await client.ConnectAsync(_emailConfig.SmtpServer, _emailConfig.Port, true);

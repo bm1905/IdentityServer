@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Shared.Models.Exceptions;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace IdentityServer.Pages.Account.Login;
@@ -117,7 +118,7 @@ public class Index : PageModel
                 }
 
                 // user might have clicked on a malicious link - should be logged
-                throw new Exception("invalid return URL");
+                throw new InternalServerErrorException("invalid return URL");
             }
 
             if (result.IsNotAllowed)
@@ -155,7 +156,7 @@ public class Index : PageModel
                 EnableLocalLogin = local,
             };
 
-            Input.Username = context?.LoginHint;
+            Input.Username = context.LoginHint;
 
             if (!local)
             {
@@ -190,7 +191,7 @@ public class Index : PageModel
         if (client != null)
         {
             allowLocal = client.EnableLocalLogin;
-            if (client.IdentityProviderRestrictions != null && client.IdentityProviderRestrictions.Any())
+            if (client.IdentityProviderRestrictions.Any())
             {
                 providers = providers.Where(provider => client.IdentityProviderRestrictions.Contains(provider.AuthenticationScheme)).ToList();
             }

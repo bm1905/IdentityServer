@@ -6,11 +6,11 @@ namespace IdentityServer.Pages.EmailConfirmation
     public class IndexModel : PageModel
     {
         [BindProperty]
-        public EmailConfirmationViewModel Input { get; set; }
+        public ConfirmEmailViewModel Input { get; set; }
 
         public IActionResult OnGet(string returnUrl)
         {
-            Input = new EmailConfirmationViewModel
+            Input = new ConfirmEmailViewModel
             {
                 ReturnUrl = returnUrl
             };

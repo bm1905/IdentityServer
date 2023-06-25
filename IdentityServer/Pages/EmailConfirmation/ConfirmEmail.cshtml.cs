@@ -1,4 +1,5 @@
 using IdentityServer.Models;
+using IdentityServer.Pages.Account.Register;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -18,12 +19,22 @@ namespace IdentityServer.Pages.EmailConfirmation
             _roleManager = roleManager;
         }
 
+        [BindProperty]
+        public ConfirmEmailViewModel Input { get; set; }
+
         public async Task<IActionResult> OnGet(string token, string email)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            Input = new ConfirmEmailViewModel();
+
+            ApplicationUser user = await _userManager.FindByEmailAsync(email);
 
 
-            var result = await _userManager.ConfirmEmailAsync(user, token);
+            IdentityResult result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                Input.ValidationSuccessful = true;
+            }
+
             return Page();
         }
     }

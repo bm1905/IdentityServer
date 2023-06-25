@@ -2,3 +2,17 @@
 @model IdentityServer.Pages.EmailConfirmation.ConfirmEmailModel
 @{
 }
+@if (Model.Input.ValidationSuccessful)
+{
+    <h1>Successful</h1>
+    <p>Email confirmation successful</p>
+}
+else
+{
+    <h1>Unsuccessful</h1>
+    <p>Email confirmation unsuccessful. The email may have been validated already or the give link might already be expired.</p>
+}
+
+<p>
+    <a asp-page="../Account/Login/Index" asp-route-returnUrl="">Login</a>
+</p>

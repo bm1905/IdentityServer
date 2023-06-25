@@ -130,7 +130,7 @@ public class Consent : PageModel
         InputModel model, string id,
         BackchannelUserLoginRequest request)
     {
-        ViewModel vm = new ViewModel
+        ViewModel vm = new()
         {
             ClientName = request.Client.ClientName ?? request.Client.ClientId,
             ClientUrl = request.Client.ClientUri,
@@ -145,7 +145,7 @@ public class Consent : PageModel
         IEnumerable<string> resourceIndicators = request.RequestedResourceIndicators ?? Enumerable.Empty<string>();
         IEnumerable<ApiResource> apiResources = request.ValidatedResources.Resources.ApiResources.Where(x => resourceIndicators.Contains(x.Name));
 
-        List<ScopeViewModel> apiScopes = new List<ScopeViewModel>();
+        List<ScopeViewModel> apiScopes = new();
         foreach (ParsedScopeValue parsedScope in request.ValidatedResources.ParsedScopes)
         {
             ApiScope apiScope = request.ValidatedResources.Resources.FindApiScope(parsedScope.ParsedName);
