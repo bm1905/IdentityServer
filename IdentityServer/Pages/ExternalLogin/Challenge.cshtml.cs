@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Shared.Models.Exceptions;
 
 namespace IdentityServer.Pages.ExternalLogin;
 
@@ -25,11 +26,11 @@ public class Challenge : PageModel
         if (Url.IsLocalUrl(returnUrl) == false && _interactionService.IsValidReturnUrl(returnUrl) == false)
         {
             // user might have clicked on a malicious link - should be logged
-            throw new Exception("invalid return URL");
+            throw new InternalServerErrorException("invalid return URL");
         }
             
         // start challenge and roundtrip the return URL and scheme 
-        AuthenticationProperties props = new AuthenticationProperties
+        AuthenticationProperties props = new()
         {
             RedirectUri = Url.Page("/externallogin/callback"),
                 

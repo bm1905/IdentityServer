@@ -78,8 +78,8 @@ public class Callback : PageModel
         // this allows us to collect any additional claims or properties
         // for the specific protocols used and store them in the local auth cookie.
         // this is typically used to store data needed for signout from those protocols.
-        List<Claim> additionalLocalClaims = new List<Claim>();
-        AuthenticationProperties localSignInProps = new AuthenticationProperties();
+        List<Claim> additionalLocalClaims = new();
+        AuthenticationProperties localSignInProps = new();
         CaptureExternalLoginContext(result, additionalLocalClaims, localSignInProps);
 
         // issue authentication cookie for user
@@ -112,7 +112,7 @@ public class Callback : PageModel
     {
         string sub = Guid.NewGuid().ToString();
             
-        ApplicationUser user = new ApplicationUser
+        ApplicationUser user = new()
         {
             Id = sub,
             UserName = sub, // don't need a username, since the user will be using an external provider to login
@@ -127,7 +127,7 @@ public class Callback : PageModel
         }
             
         // create a list of claims that we want to transfer into our store
-        List<Claim> filtered = new List<Claim>();
+        List<Claim> filtered = new();
 
         // user's display name
         string name = claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Name)?.Value ??

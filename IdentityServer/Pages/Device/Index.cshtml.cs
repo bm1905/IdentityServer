@@ -56,7 +56,8 @@ public class Index : PageModel
             return Page();
         }
 
-        Input = new InputModel { 
+        Input = new InputModel
+        { 
             UserCode = userCode,
         };
 
@@ -141,7 +142,7 @@ public class Index : PageModel
 
     private ViewModel CreateConsentViewModel(InputModel model, DeviceFlowAuthorizationRequest request)
     {
-        ViewModel vm = new ViewModel
+        ViewModel vm = new()
         {
             ClientName = request.Client.ClientName ?? request.Client.ClientId,
             ClientUrl = request.Client.ClientUri,
@@ -151,7 +152,7 @@ public class Index : PageModel
 
         vm.IdentityScopes = request.ValidatedResources.Resources.IdentityResources.Select(x => CreateScopeViewModel(x, model == null || model.ScopesConsented?.Contains(x.Name) == true)).ToArray();
 
-        List<ScopeViewModel> apiScopes = new List<ScopeViewModel>();
+        List<ScopeViewModel> apiScopes = new();
         foreach (ParsedScopeValue parsedScope in request.ValidatedResources.ParsedScopes)
         {
             ApiScope apiScope = request.ValidatedResources.Resources.FindApiScope(parsedScope.ParsedName);

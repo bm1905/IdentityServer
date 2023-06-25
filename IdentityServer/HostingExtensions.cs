@@ -95,7 +95,7 @@ internal static class HostingExtensions
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-            endpoints.MapHealthChecks("/healthcheck", new HealthCheckOptions()
+            endpoints.MapHealthChecks("/healthcheck", new HealthCheckOptions
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse

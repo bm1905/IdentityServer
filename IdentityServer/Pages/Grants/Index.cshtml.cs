@@ -36,7 +36,7 @@ public class Index : PageModel
     {
         IEnumerable<Grant> grants = await _interaction.GetAllUserGrantsAsync();
 
-        List<GrantViewModel> list = new List<GrantViewModel>();
+        List<GrantViewModel> list = new();
         foreach (Grant grant in grants)
         {
             Client client = await _clients.FindClientByIdAsync(grant.ClientId);
@@ -44,7 +44,7 @@ public class Index : PageModel
             {
                 Resources resources = await _resources.FindResourcesByScopeAsync(grant.Scopes);
 
-                GrantViewModel item = new GrantViewModel()
+                GrantViewModel item = new()
                 {
                     ClientId = client.ClientId,
                     ClientName = client.ClientName ?? client.ClientId,

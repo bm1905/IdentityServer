@@ -136,7 +136,7 @@ public class Index : PageModel
         InputModel model, string returnUrl,
         AuthorizationRequest request)
     {
-        ViewModel vm = new ViewModel
+        ViewModel vm = new()
         {
             ClientName = request.Client.ClientName ?? request.Client.ClientId,
             ClientUrl = request.Client.ClientUri,
@@ -151,7 +151,7 @@ public class Index : PageModel
         IEnumerable<string> resourceIndicators = request.Parameters.GetValues(OidcConstants.AuthorizeRequest.Resource) ?? Enumerable.Empty<string>();
         IEnumerable<ApiResource> apiResources = request.ValidatedResources.Resources.ApiResources.Where(x => resourceIndicators.Contains(x.Name));
 
-        List<ScopeViewModel> apiScopes = new List<ScopeViewModel>();
+        List<ScopeViewModel> apiScopes = new();
         foreach (ParsedScopeValue parsedScope in request.ValidatedResources.ParsedScopes)
         {
             ApiScope apiScope = request.ValidatedResources.Resources.FindApiScope(parsedScope.ParsedName);

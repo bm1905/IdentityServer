@@ -28,7 +28,7 @@ public class DbInitializer
         if (await roleManager.FindByNameAsync(Admin) == null)
         {
             await roleManager.CreateAsync(new IdentityRole(Admin));
-            ApplicationUser adminUser = new ApplicationUser
+            ApplicationUser adminUser = new()
             {
                 UserName = "admin_user",
                 Email = "bijay@admin.com",
@@ -42,7 +42,7 @@ public class DbInitializer
             if (await roleManager.FindByNameAsync(Regular) != null) return true;
 
             await roleManager.CreateAsync(new IdentityRole(Regular));
-            ApplicationUser regularUser = new ApplicationUser
+            ApplicationUser regularUser = new()
             {
                 UserName = "regular_user",
                 Email = "bijay@regular.com",

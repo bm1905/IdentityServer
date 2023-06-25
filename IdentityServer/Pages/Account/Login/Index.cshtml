@@ -1,4 +1,5 @@
 @page
+@using IdentityServer.Pages.Account.Login
 @model IdentityServer.Pages.Account.Login.Index
 
 <div class="login-page">
@@ -61,7 +62,7 @@
                     </div>
                     <div class="card-body">
                         <ul class="list-inline">
-                            @foreach (var provider in Model.View.VisibleExternalProviders)
+                            @foreach (ViewModel.ExternalProvider provider in Model.View.VisibleExternalProviders)
                             {
                                 <li class="list-inline-item">
                                     <a class="btn btn-secondary"
