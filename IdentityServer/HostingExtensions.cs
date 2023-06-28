@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
+using Shared.Models.Exceptions;
 
 namespace IdentityServer;
 
@@ -28,7 +29,7 @@ internal static class HostingExtensions
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
-            options.UseSqlServer(configuration.GetSection("ConnectionStrings:DatabaseConnection").Value);
+            options.UseSqlServer(configuration.GetSection("ConnectionStrings:DatabaseConnection").Value ?? throw new InternalServerErrorException("Unable to get database connection string"));
         });
 
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
@@ -53,9 +54,22 @@ internal static class HostingExtensions
                 options.Events.RaiseSuccessEvents = true;
                 options.EmitStaticAudienceClaim = true;
             })
-            .AddInMemoryIdentityResources(Config.IdentityResources)
-            .AddInMemoryApiScopes(Config.ApiScopes(configuration))
-            .AddInMemoryClients(Config.Clients(configuration))
+            .AddConfigurationStore(options =>
+            {
+                string connectionString = configuration.GetSection("ConnectionStrings:DatabaseConnection").Value ?? throw new InternalServerErrorException("Unable to get database connection string");
+                options.ConfigureDbContext = contextOptionsBuilder =>
+                    contextOptionsBuilder.UseSqlServer(connectionString,
+                        sqlOptions => sqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+
+            })
+            .AddOperationalStore(options =>
+            {
+                string connectionString = configuration.GetSection("ConnectionStrings:DatabaseConnection").Value ?? throw new InternalServerErrorException("Unable to get database connection string");
+                options.ConfigureDbContext = contextOptionsBuilder =>
+                    contextOptionsBuilder.UseSqlServer(connectionString,
+                        sqlOptions => sqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+
+            })
             .AddAspNetIdentity<ApplicationUser>()
             .AddDeveloperSigningCredential();
 

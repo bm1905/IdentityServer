@@ -1,5 +1,4 @@
 using IdentityServer.Models;
-using IdentityServer.Pages.Account.Register;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
