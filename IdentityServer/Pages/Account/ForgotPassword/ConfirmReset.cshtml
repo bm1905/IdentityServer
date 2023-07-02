@@ -1,0 +1,19 @@
+﻿@page
+@model IdentityServer.Pages.Account.ForgotPassword.ConfirmResetModel
+@{
+}
+@if (Model.Input.ResetSuccessful)
+{
+    <h1>Successful</h1>
+    <p>Password reset successful</p>
+}
+else
+{
+    <h1>Unsuccessful</h1>
+    <p>Password reset unsuccessful.</p>
+}
+
+<p>
+    <a asp-page="../Login/Index" asp-route-returnUrl="">Login</a>
+</p>
+

@@ -1,4 +1,4 @@
-﻿namespace IdentityServer.Pages.EmailConfirmation
+﻿namespace IdentityServer.Pages.Account.EmailConfirmation
 {
     public class ConfirmEmailViewModel
     {

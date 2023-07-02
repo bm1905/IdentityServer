@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServer.Pages.EmailConfirmation
+namespace IdentityServer.Pages.Account.EmailConfirmation
 {
     public class IndexModel : PageModel
     {

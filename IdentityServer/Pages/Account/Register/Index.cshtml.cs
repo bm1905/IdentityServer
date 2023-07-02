@@ -92,7 +92,7 @@ public class IndexModel : PageModel
 
             string domain = $"{Request.Scheme}://{Request.Host}";
 
-            string confirmationLink = Url.Page("/EmailConfirmation/ConfirmEmail", new { token, email = user.Email });
+            string confirmationLink = Url.Page("/Account/EmailConfirmation/ConfirmEmail", new { token, email = user.Email });
             if (string.IsNullOrEmpty(domain) || string.IsNullOrEmpty(confirmationLink))
             {
                 throw new InternalServerErrorException("Unable to generate confirmation link");

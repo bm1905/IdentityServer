@@ -1,5 +1,5 @@
 ﻿@page
-@model IdentityServer.Pages.EmailConfirmation.ConfirmEmailModel
+@model IdentityServer.Pages.Account.EmailConfirmation.ConfirmEmailModel
 @{
 }
 @if (Model.Input.ValidationSuccessful)
@@ -14,5 +14,5 @@ else
 }
 
 <p>
-    <a asp-page="../Account/Login/Index" asp-route-returnUrl="">Login</a>
+    <a asp-page="../Login/Index" asp-route-returnUrl="">Login</a>
 </p>
