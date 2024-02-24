@@ -4,9 +4,10 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger:
-- dev
+- master
 
 pool:
+  name: 'shared-pool'
   vmImage: 'windows-latest'
 
 variables:
@@ -16,11 +17,13 @@ variables:
 
 steps:
 - task: NuGetToolInstaller@1
-
+- task: NuGetAuthenticate@0
 - task: NuGetCommand@2
   inputs:
+    command: 'restore'
     restoreSolution: '$(solution)'
-
+    feedsToUse: 'select'
+    vstsFeed: '063bfe6a-f1c0-474d-bdb1-e6ef5a17ecbd/cb22b8c5-c32b-4931-b1f0-b60ce3fbd423'
 - task: VSBuild@1
   inputs:
     solution: '$(solution)'
@@ -32,3 +35,5 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+- task: PublishBuildArtifacts@1
